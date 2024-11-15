@@ -1,0 +1,86 @@
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-950">
+  <div class="w-full max-w-3xl p-8 bg-gray-800 shadow-lg rounded-lg">
+      <!-- Notificación -->
+    <div *ngIf="showNotification"
+    class="fixed inset-x-0 mx-auto mt-10 top-4 w-fit flex flex-col items-center px-8 py-4 rounded-xl shadow-2xl animate-bounce-soft z-50 text-center backdrop-blur-sm"
+    [ngClass]="{
+      'bg-green-500/90 text-white': isSuccess === true,
+      'bg-orange-500/90 text-white': isSuccess === null,
+      'bg-red-500/90 text-white': isSuccess === false
+    }">
+      <div class="text-2xl font-bold mb-3">🎯 Resultados finales</div>
+      <div class="flex gap-6">
+        <div class="flex flex-col">
+          <span class="text-sm uppercase tracking-wider opacity-75">WPM</span>
+          <span class="text-3xl font-mono font-bold">{{ wpm }}</span>
+        </div>
+        <div class="w-px bg-white/20"></div> <!-- Separador vertical -->
+        <div class="flex flex-col">
+          <span class="text-sm uppercase tracking-wider opacity-75">Precisión</span>
+          <span class="text-3xl font-mono font-bold">{{ accuracy | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-6 text-3xl sm:text-4xl font-mono text-gray-200">
+      <div class="relative flex flex-col items-center justify-center text-center">
+        <div class="max-w-2xl mx-auto">
+          <!-- Iteramos sobre las palabras -->
+          <span *ngFor="let word of currentPhrase.split(' '); let wordIndex = index" class="inline-block">
+            <!-- Iteramos sobre las letras de cada palabra -->
+            <span *ngFor="let char of word.split(''); let charIndex = index"
+                  class="relative inline-block"
+                  [ngClass]="{
+                    'text-gray-400': (getAbsoluteIndex(wordIndex, charIndex)) >= userInput.length,
+                    'text-green-500': (getAbsoluteIndex(wordIndex, charIndex)) < userInput.length &&
+                                     userInput[getAbsoluteIndex(wordIndex, charIndex)] === char,
+                    'text-red-500 bg-red-900': (getAbsoluteIndex(wordIndex, charIndex)) < userInput.length &&
+                                              userInput[getAbsoluteIndex(wordIndex, charIndex)] !== char
+                  }">
+                {{ char }}
+                <!-- Cursor parpadeante -->
+                <span *ngIf="getAbsoluteIndex(wordIndex, charIndex) === userInput.length"
+                      class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 animate-blink">
+                </span>
+            </span>
+            <!-- Espacio entre palabras -->
+            <span *ngIf="wordIndex < currentPhrase.split(' ').length - 1"
+                  class="relative inline-block"
+                  [ngClass]="{
+                    'text-gray-400': getAbsoluteIndex(wordIndex, word.length) >= userInput.length,
+                    'text-green-500': getAbsoluteIndex(wordIndex, word.length) < userInput.length,
+                  }">
+              &nbsp;
+              <!-- Cursor para el espacio -->
+              <span *ngIf="getAbsoluteIndex(wordIndex, word.length) === userInput.length"
+                    class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 animate-blink">
+              </span>
+            </span>
+          </span>
+        </div>
+        <!-- Input existente -->
+        <input *ngIf="!isCompleted"
+          [(ngModel)]="userInput"
+          (input)="checkInput()"
+          class="opacity-0 absolute inset-0 w-full h-full cursor-default"
+          autocomplete="off"
+          spellcheck="false"
+          #inputField
+        />
+      </div>
+    </div>
+
+    <!-- Botón de retry -->
+    <div *ngIf="isCompleted" class="flex justify-center mt-4">
+      <button
+        (click)="retry()"
+        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
+               transition-colors duration-200 flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+        </svg>
+        <span>Intentar de nuevo</span>
+      </button>
+    </div>
+  </div>
+</div>
